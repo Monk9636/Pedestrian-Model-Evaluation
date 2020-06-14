@@ -82,21 +82,22 @@ def TrajecotoriesNorAdjustment(point, start_point, original_point, angle):
 
 
 def FPSAdjustment(ori_trajectories_list_list_list, orifps, destfps):
-    times = orifps / destfps
+
     dest_trajectories_list_list_list = []
     for i in range(len(ori_trajectories_list_list_list)):
         dest_trajectories_list_list = []
+        times = orifps[i] / destfps
         for j in range(len(ori_trajectories_list_list_list[i])):
             dest_trajectories_list = []
-            for k in range(len(ori_trajectories_list_list_list[i][j])):
+            for k in range(len(ori_trajectories_list_list_list[i][j])):#实验人数
                 dest_trajectories = []
-                for ii in range(len(ori_trajectories_list_list_list[i][j][k])):
+                for ii in range(len(ori_trajectories_list_list_list[i][j][k])):#实验帧数即步数
                     if ii % times == 0:
                         dest_trajectories.append(ori_trajectories_list_list_list[i][j][k][ii])
                 dest_trajectories_list.append(dest_trajectories)
             dest_trajectories_list_list.append(dest_trajectories_list)
         dest_trajectories_list_list_list.append(dest_trajectories_list_list)
-    return dest_trajectories_list_list_list
+    return dest_trajectories_list_list_list#调整后帧率的实验数据
 
 
 # Filter unnecessary trajectories
@@ -118,7 +119,7 @@ def FilterTrajectories(tra_list_list, ori_point, dest_point, cutoff_distance):
     return updated_tra_list_list
 
 
-# Fundamental diagram
+# Fundamental diagram#速度-密度关系图
 def CalculateFundamentalDiagram(trajectories_list_list, fps):
     fd_list = []
     for i in range(len(trajectories_list_list)):
@@ -288,7 +289,7 @@ def Evaluation(oripoint, destpoint, ori_exp_trajectories_list_list, ori_sim_traj
     sim_modi_trajectories_list_list = FilterTrajectories(sim_trajectories_list_list, oripoint, destpoint,
                                                          cutoff_distance)
 
-    # fd based data list
+    # fd based data list fd指基本图即流密关系
     index_fd = SimilarityIndexes(CalculateFundamentalDiagram(ori_exp_trajectories_list_list, fps),
                                  CalculateFundamentalDiagram(ori_sim_trajectories_list_list, fps),
                                  'dtw-fd', '-fd')
@@ -344,14 +345,15 @@ def Evaluation(oripoint, destpoint, ori_exp_trajectories_list_list, ori_sim_traj
 
 
 ### top bottom
+#
 if __name__ == "__main__":
     Original_Point = (0, 0)  # starting position
     Destination_Point = (20, 0)  # destination position
     Cutoff_Distance = 1  # cut-off distance
-    Ori_Fps = 25  # flames per second
-    Dest_Fps = 5  # flames per second
-    Labels = ['EXP', 'SFM', 'HM', 'BM']
-    Line_Styles = ['k--', 'b^-.', 'gs--', 'ro-', 'yv:']
+    Ori_Fps = [25,50]  # flames per second初始FPS
+    Dest_Fps = 5  # flames per second目标FPS
+    Labels = ['EXP', 'RVO']# 'HM','EXP', 'SFM', 'BM', 'VO',
+    Line_Styles = ['k--', 'ro-']# 'ro-','k--', 'b^-.', 'gs--', 'yv:',
     # Folder_Name = r'C:\Users\xiaoy\Nut\Nutstore\Codes\Pedestrian Dynamics\Code_Voronoi_x1' \
     #               r'\PedestrianFlow_Forcebasedmodel\bin\Debug\Evaluation-Test'
     Folder_Name = r'BaseData'
@@ -366,10 +368,14 @@ if __name__ == "__main__":
     for i in range(0, len(Trajectories_List_List_List)):
         scores = Evaluation(Original_Point, Destination_Point, Trajectories_List_List_List[0],
                             Trajectories_List_List_List[i],
-                            Cutoff_Distance, Dest_Fps)
+                            Cutoff_Distance, Dest_Fps)#得分值计算
         Scores_List.append(scores)
     Scores_List = ScoreNormalization(Scores_List)
 
     Radar.SoloRadarFigure(Scores_List, Line_Styles, Labels)
     Radar.RadarFigure(Scores_List, Line_Styles, Labels)
     print("Finished!!")
+
+
+
+
